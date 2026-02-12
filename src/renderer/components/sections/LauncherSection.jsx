@@ -115,9 +115,7 @@ export function LauncherSection() {
   return (
     <div>
       <h2 style={styles.h2}>Launcher</h2>
-      <p style={styles.p}>
-        Launch applications and tools on this PC. Configure EXE paths in .env if a tool does not start.
-      </p>
+
       {message && (
         <div style={{ ...styles.message, ...(message.type === 'error' ? styles.messageError : styles.messageSuccess) }}>
           {message.text}
