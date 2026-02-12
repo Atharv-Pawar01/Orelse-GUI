@@ -1,38 +1,27 @@
 import React from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { usePrivilege } from '../hooks/usePrivilege'
 import { colors } from '../theme/colors'
 import { AlarmsStrip } from './AlarmsStrip'
+import logoImg from '../assets/arcon-logo.jpg'
 
 const SECTIONS = {
-  dashboard: 'Dashboard',
-  wincc: 'WinCC Access',
-  hminavi: 'HmiNavi Access',
-  editConfig: 'Edit configuration',
-  admin: 'Admin'
+  launcher: 'Launcher',
+  analyser: 'Analyser'
 }
 
-export function Layout({ currentSection, onSectionChange, children }) {
-  const { user, role, logout } = useAuth()
-  const {
-    canLaunchWinCC,
-    canRequestEditConfig,
-    canAccessAdminControls
-  } = usePrivilege()
+const navItems = [
+  { id: 'launcher', label: SECTIONS.launcher },
+  { id: 'analyser', label: SECTIONS.analyser }
+]
 
-  const navItems = [
-    { id: 'dashboard', label: SECTIONS.dashboard },
-    { id: 'wincc', label: SECTIONS.wincc },
-    { id: 'hminavi', label: SECTIONS.hminavi },
-    ...(canRequestEditConfig ? [{ id: 'editConfig', label: SECTIONS.editConfig }] : []),
-    ...(canAccessAdminControls ? [{ id: 'admin', label: SECTIONS.admin }] : [])
-  ]
+export function Layout({ currentSection, onSectionChange, children, isLoading }) {
+  const { user, role, logout } = useAuth()
 
   return (
     <div style={styles.wrapper}>
       <header style={styles.header}>
         <div style={styles.headerLeft}>
-          <span style={styles.logo}>Orelse</span>
+          <img src={logoImg} alt="ARCON" style={styles.logoImg} />
           <div style={styles.statusBar}>
             <span style={styles.statusItem}>
               <span style={styles.statusDot} />
@@ -46,11 +35,13 @@ export function Layout({ currentSection, onSectionChange, children }) {
         </div>
         <div style={styles.headerRight}>
           <span style={styles.user}>
-            {user} <span style={styles.role}>({role})</span>
+            {isLoading || user == null ? '…' : <>{user} <span style={styles.role}>({role})</span></>}
           </span>
-          <button type="button" onClick={logout} style={styles.logoutBtn}>
-            Log out
-          </button>
+          {!isLoading && user != null && (
+            <button type="button" onClick={logout} style={styles.logoutBtn}>
+              Log out
+            </button>
+          )}
         </div>
       </header>
       <AlarmsStrip alarmCount={0} />
@@ -75,7 +66,7 @@ export function Layout({ currentSection, onSectionChange, children }) {
         </main>
       </div>
       <footer style={styles.footer}>
-        <span>© 2026 Orelse</span>
+        <span>© 2026 ARCON</span>
         
       </footer>
     </div>
@@ -105,9 +96,11 @@ const styles = {
     alignItems: 'center',
     gap: 24
   },
-  logo: {
-    fontWeight: 600,
-    fontSize: 18
+  logoImg: {
+    height: 36,
+    borderRadius: 8,
+    objectFit: 'contain',
+    display: 'block'
   },
   statusBar: {
     display: 'flex',

@@ -41,7 +41,7 @@ export function WinCCAccess() {
     <div>
       <h2 style={styles.h2}>WinCC Access</h2>
       <p style={styles.p}>
-        Access to WinCC is mediated by PAM. Launch the WinCC Runtime application on this PC.
+        Launch the WinCC Runtime application on this PC.
       </p>
       {message && (
         <div style={{ ...styles.message, ...(message.type === 'error' ? styles.messageError : styles.messageSuccess) }}>
@@ -51,7 +51,7 @@ export function WinCCAccess() {
       <div style={styles.cards}>
         <div style={styles.card}>
           <h3 style={styles.cardTitle}>WinCC Runtime</h3>
-          <p style={styles.cardP}>Launch WinCC Runtime executable on this PC.</p>
+          <p style={styles.cardP}>Launch WinCC on this PC.</p>
           <button
             type="button"
             style={styles.button}

@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react'
 import * as pam from '../services/pam.js'
 import {
   initKeycloak,
   getSessionFromKeycloak,
   keycloakLogin,
-  keycloakLogout
+  keycloakLogout,
+  checkKeycloakReachable
 } from '../services/keycloak.js'
 import { ROLES, PRIVILEGED_ACTIONS } from '../../shared/roles.js'
 
@@ -24,26 +25,90 @@ export function AuthProvider({ children }) {
   const [approvedActions, setApprovedActions] = useState({}) // { [actionId]: expiresAt }
   const [authReady, setAuthReady] = useState(false)
 
+  // Guard against React StrictMode double-mount: if the first effect is
+  // cleaned up before the async work finishes we must not apply stale state.
+  const cancelledRef = useRef(false)
+  const initTimeoutRef = useRef(null)
+
   useEffect(() => {
-    initKeycloak()
-      .then(() => {
+    cancelledRef.current = false
+
+    const showKeycloakUnreachable = () => {
+      if (!cancelledRef.current) {
+        setAuthError('Cannot reach Keycloak server. Is it running? Check VITE_KEYCLOAK_URL in .env.')
+        setAuthReady(true)
+      }
+    }
+
+    initTimeoutRef.current = setTimeout(() => {
+      if (cancelledRef.current) return
+      setAuthReady((ready) => {
+        if (ready) return ready
+        setAuthError('Keycloak is not responding. Please check if the Keycloak server is running.')
+        return true
+      })
+    }, 10000)
+
+    // 1) Check reachability first so we never redirect to a down server
+    checkKeycloakReachable()
+      .then((reachable) => {
+        if (cancelledRef.current) return
+        if (!reachable) {
+          showKeycloakUnreachable()
+          return
+        }
+        // 2) Keycloak is up: init and then redirect if no session
+        return initKeycloak()
+      })
+      .then((kcResult) => {
+        if (cancelledRef.current) return
+        if (kcResult === undefined) return // we already bailed (unreachable)
         const session = getSessionFromKeycloak()
         if (session) {
           setUser(session.user)
           setRole(session.role)
           setSessionId(session.sessionId || null)
+        } else {
+          keycloakLogin().catch((err) => {
+            if (!cancelledRef.current) {
+              setAuthError(err.message || 'Login failed')
+            }
+          })
         }
       })
       .catch((err) => {
-        setAuthError(err.message || 'Keycloak not configured')
+        if (!cancelledRef.current) {
+          setAuthError(err.message || 'Keycloak not configured')
+        }
       })
-      .finally(() => setAuthReady(true))
+      .finally(() => {
+        if (initTimeoutRef.current) {
+          clearTimeout(initTimeoutRef.current)
+          initTimeoutRef.current = null
+        }
+        if (!cancelledRef.current) {
+          setAuthReady(true)
+        }
+      })
+
+    return () => {
+      cancelledRef.current = true
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current)
+        initTimeoutRef.current = null
+      }
+    }
   }, [])
 
   const login = useCallback(async () => {
     setAuthError(null)
     try {
       await initKeycloak()
+      const reachable = await checkKeycloakReachable()
+      if (!reachable) {
+        setAuthError('Cannot reach Keycloak server. Is it running? Check VITE_KEYCLOAK_URL in .env.')
+        return { ok: false }
+      }
       await keycloakLogin()
       return { ok: true }
     } catch (err) {
@@ -58,7 +123,7 @@ export function AuthProvider({ children }) {
     setSessionId(null)
     setAuthError(null)
     setApprovedActions({})
-    keycloakLogout().catch(() => {})
+    keycloakLogout().catch(() => { })
   }, [])
 
   const requestPrivilegedAccess = useCallback(async (actionId, reason) => {

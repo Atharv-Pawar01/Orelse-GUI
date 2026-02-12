@@ -41,7 +41,7 @@ export function HmiNaviAccess() {
     <div>
       <h2 style={styles.h2}>HmiNavi Access</h2>
       <p style={styles.p}>
-        HmiNavi (Advantech) is open-architecture HMI software for industrial visualization and control. Launch the application on this PC.
+        Launch the HmiNavi application on this PC.
       </p>
       {message && (
         <div style={{ ...styles.message, ...(message.type === 'error' ? styles.messageError : styles.messageSuccess) }}>

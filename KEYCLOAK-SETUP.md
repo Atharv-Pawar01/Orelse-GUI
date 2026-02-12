@@ -61,6 +61,19 @@ Wait until you see something like "Keycloak ... started". The server will be at 
 
 ---
 
+## 5b. Show "ARCON" on the Keycloak login/sign-up page
+
+The text shown on the Keycloak-hosted login and registration page (e.g. "Orelse") comes from the **realm display name**. To show **ARCON** instead:
+
+1. In Keycloak Admin, select your realm from the top-left dropdown.
+2. Left menu: **Realm settings** → **General** tab.
+3. Set **Display name** to **ARCON** (leave "Realm name" as-is so it still matches `.env`).
+4. Click **Save**.
+
+After this, when users are sent to Keycloak to sign in or sign up, the page will show **ARCON** as the application name.
+
+---
+
 ## 6. Create realm roles (for RBAC)
 
 1. In the left menu, open **Realm roles**.
@@ -136,6 +149,7 @@ VITE_KEYCLOAK_CLIENT_ID=wincc-pam-gui
 | 3 | Run `bin\kc.bat start-dev` (Windows) or `./bin/kc.sh start-dev` (Linux/macOS) |
 | 4 | Create admin user at http://localhost:8080 (first time) |
 | 5 | Create realm with **exact** name from `.env` (e.g. **Orelse**) |
+| 5b | Realm settings → General → **Display name** = **ARCON** (so login/sign-up page shows ARCON) |
 | 6 | Create realm roles: **Operator**, **Engineer**, **Admin** |
 | 7 | Create client with ID from `.env` (e.g. **wincc-pam-gui**), redirect URI `http://localhost:5173` |
 | 8 | Create users and assign roles |

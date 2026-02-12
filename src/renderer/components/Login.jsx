@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { colors } from '../theme/colors'
+import logoImg from '../assets/arcon-logo.jpg'
 
 export function Login() {
   const [loading, setLoading] = useState(false)
@@ -19,7 +20,7 @@ export function Login() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.title}>Orelse</h1>
+        <img src={logoImg} alt="ARCON" style={styles.logoImg} />
         <p style={styles.subtitle}>Sign in with Keycloak</p>
         {!authReady ? (
           <p style={styles.loading}>Loading…</p>
@@ -60,10 +61,14 @@ const styles = {
     boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
     border: `1px solid ${colors.border}`
   },
-  title: {
-    margin: '0 0 4px',
-    color: colors.textPrimary,
-    fontSize: 24
+  logoImg: {
+    width: '100%',
+    maxWidth: 200,
+    height: 'auto',
+    borderRadius: 12,
+    objectFit: 'contain',
+    display: 'block',
+    margin: '0 auto 20px'
   },
   subtitle: {
     margin: '0 0 24px',

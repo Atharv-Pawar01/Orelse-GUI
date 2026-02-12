@@ -9,7 +9,7 @@ export function DashboardSection() {
     <div>
       <h2 style={styles.h2}>Dashboard</h2>
       <p style={styles.p}>
-        Authenticated via Acronis PAM. Role-based access applies. Use the side navigation to open sections.
+      
       </p>
       <div style={styles.cards}>
         <div style={styles.card}>
